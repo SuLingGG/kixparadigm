@@ -16,6 +16,8 @@ Verify:
 node bin/kixparadigm.js doctor
 ```
 
+Usage guide: [docs/usage-guide.md](docs/usage-guide.md).
+
 Remove:
 
 ```bash

@@ -17,6 +17,7 @@
 | 唯一上游损失 | 0.2.2 移除了 `native + PTC(run_code)` 并存的 `both` 模式；本发行版选 **native**（详见下文） |
 
 分析全文：[docs/dsh-0.2.2-compat.md](docs/dsh-0.2.2-compat.md)。
+完整使用手册（安装、推荐用法、逐个工具场景与范例）：[docs/usage-guide.md](docs/usage-guide.md)。
 
 ## 安装
 
