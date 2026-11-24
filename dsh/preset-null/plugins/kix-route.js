@@ -692,6 +692,66 @@ module.exports = {
       }
     }, true)
 
+    // 0.2.2: request-time route replacement is rejected after step preparation
+    // fixed the selection. Resolve kix tier sentinels at agent/created (before
+    // the first step) and record the route through the durable model selection.
+    ctx.on('agent/created', async ({ agent, signal }) => {
+      if (!agent) return
+      const opts = agent.options ?? {}
+      if ((opts.subagentDepth ?? 0) < 1) return
+      const tier = sentinelTierOf(opts.model)
+      if (tier === undefined) return
+      const llm = ctx.get('llm')
+      if (llm === undefined) {
+        throw new Error('kix-route: llm 服务不可用，无法解析 ' + SENTINEL_PREFIX + tier + ' 子代理路由（检查宿主 llm 插件是否加载）')
+      }
+      void auditOnce()
+      let hit
+      try {
+        if (tier === 'cross') hit = await resolveCrossRoute(llm, opts.provider, signal, prefs, health.isHealthy)
+        else if (tier === 'vision') hit = await resolveVisionRoute(llm, signal, prefs, health.isHealthy)
+        else hit = await resolveThinkerRoute(llm, signal, prefs, health.isHealthy)
+      } catch (e) {
+        const msg = e && e.message ? e.message : String(e)
+        if (e && e.probe === true) throw new Error('kix-route: ' + tier + ' 路由探测失败（模型目录/服务暂不可达），请稍后重试。底层错误：' + msg)
+        throw e
+      }
+      if (hit === undefined && tier === 'thinker') {
+        const defaults = ctx.get('agentDefaultModel')
+        if (defaults !== undefined) {
+          try {
+            const sel = defaults.currentSelection()
+            if (sel !== undefined && sel.provider && sel.model && health.isHealthy(sel.provider)) hit = { provider: sel.provider, model: sel.model }
+          } catch {
+            /* ignore */
+          }
+        }
+        if (hit === undefined) hit = await resolveFallbackRoute(llm, signal, prefs, health.isHealthy)
+      }
+      if (hit === undefined) {
+        const msg = tier === 'cross'
+          ? crossFailText(opts.provider, registeredProviders(llm))
+          : tier === 'vision'
+            ? visionFailText(registeredProviders(llm))
+            : thinkerFailText()
+        throw new Error(msg)
+      }
+      const selection = { provider: hit.provider, model: hit.model }
+      if (typeof decideEffortShared === 'function') {
+        const effort = decideEffortShared(hit.provider, opts.maxTokens)
+        if (effort !== undefined) selection.reasoningEffort = effort
+      }
+      agent.model.select(selection)
+      routes.set(agent, {
+        hit,
+        tier,
+        parentProvider: tier === 'cross' ? opts.provider : undefined,
+        failovers: 0,
+        failedProviders: new Set(),
+        degraded: false,
+      })
+    })
+
     ctx.on('agent/request', async (payload, next) => {
       void auditOnce() // 首次请求时对目录自查一次配置偏好（只 warn，不阻塞/不改路由）
       const resolved = await next()

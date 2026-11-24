@@ -1,84 +1,188 @@
-# kixparadigm
+# kixparadigm — DSH-only distribution
 
-> **AI 自编排最小范式（认知层常驻）× 多智能体编排 × 编码 Agent 预设** — 一个仓库装下 kix 全家桶，`npm` 一键导入 DeepSeek Harness，脚本导入 VS Code Copilot。
+> 本仓库是 [olicesx/kixparadigm](https://github.com/olicesx/kixparadigm) 的 **DeepSeek Harness 专用提取版**：
+> 只保留 `dsh/` preset、插件、子代理预设、安装器与兼容性补丁；不含 VS Code Copilot 分发、`en/` 双语包和渲染基准。
+> 目标：在 **DSH 0.2.2-rc.5** 上恢复当前部署（0.1.5 / 0.2.0 时代）的 kix 特性，且不出现功能缺失、功能异常和 Bug。
 
-[![CI](https://github.com/olicesx/kixparadigm/actions/workflows/ci.yml/badge.svg)](https://github.com/olicesx/kixparadigm/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/kixparadigm)](https://www.npmjs.com/package/kixparadigm)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+## 结论先说
 
-> **🌍 English:** [README.en.md](README.en.md) · **中文:** 本文件
->
-> 本文档实践仓库自身的范式：**常驻最小、渐进披露、易变数字不双源维护** —— 版本史在 [CHANGELOG.md](CHANGELOG.md)，机制映射在 [dsh/preset-classic/DSH-ADAPTATION.md](dsh/preset-classic/DSH-ADAPTATION.md)（默认档根不部署该文件），细节不在此重复。
+| 项 | 状态 |
+|---|---|
+| 目标 DSH | **0.2.2-rc.5**（已端到端实测） |
+| preset 可见性 | `kixparadigm`、`kixparadigm-classic` + 4 个角色子代理 preset 全部 `broken=OK` |
+| 会话/模型 | 已建会话并用真实模型完成对话、工具调用、子代理派发 |
+| 子代理 | generic / cross / lite / thinker / vision / reviewer / qa / dev 全部可用 |
+| 压缩 | `/compact` 成功；绝对上限 `maxThresholdTokens` / `maxRetainTokens` 经运行时补丁恢复 |
+| 本地资源 | 全部安装到 `$DSH_HOME`，不写系统目录；`uninstall` 可完全移除 |
+| 唯一上游损失 | 0.2.2 移除了 `native + PTC(run_code)` 并存的 `both` 模式；本发行版选 **native**（详见下文） |
 
-## 为什么
+分析全文：[docs/dsh-0.2.2-compat.md](docs/dsh-0.2.2-compat.md)。
 
-kix 范式原是 VS Code Copilot 定制包。研究 DeepSeek Harness（DSH）后发现两者**机制天然适配**：常驻认知 = preset persona、门禁 hooks = `tools/pre-execute` 插件、团队 Agent = subagent 分派、slash 命令 = DSH 原生命令、识图补足 = vision-bridge。完整映射见 [DSH-ADAPTATION.md](dsh/preset-classic/DSH-ADAPTATION.md) 与 [DSH-FUSION-MATRIX.md](dsh/preset-classic/DSH-FUSION-MATRIX.md)。
+## 安装
 
-适配带来一个现实转变：范式从「一个人本机的 Copilot 定制」变成「一条命令可复现的公开资产」——这是本仓库开源的契机。
-
-## 快速开始（DSH，推荐）
-
-```bash
-npm i -g kixparadigm     # 同时安装默认模式 kixparadigm + 经典模式 kixparadigm-classic + vision-bridge；重启 dsh web 后在模式列表选择
-npx kixparadigm install  # 不全局安装
-npm i -g kixparadigm-en  # 英文经典模式 kixparadigm-classic-en（独立包）
-```
-
-> v1.3.4 起 `npm i -g kixparadigm` 会把两个变体都装进 `~/.dsh/.agent-presets/`。消融对照 `kixparadigm-null` 不随 npm 安装。
->
-> **先选对模式**：默认 `kixparadigm` 是激励面（压缩思考锚点 + 效用准则 + 按需技能货架；无仪式流水线；agents/skills 货架经指针共享 classic（安装时物化））。`kixparadigm-classic` 是全文编曲配套（思考锚点全文 + kixpower 说明书 + agents/instructions）。复杂协作 / 研究范式仍可用 classic；默认档不再把核心哲学砍掉。选择器是任务属性，不是「半价 = 没有脑子」。
-
-自定义 DSH 目录（`DSH_HOME`）、`--preset-only`、运维命令（`doctor` / `uninstall` / `copilot`）见 [dsh/README-DSH.md](dsh/README-DSH.md)。
-
-## 快速开始（VS Code Copilot）
+前置：已安装 DSH `0.2.2-rc.5`，并且至少启动过一次 `dsh web`（生成 `$DSH_HOME/profiles/web/`）。
 
 ```bash
-# Windows
-.\install.ps1
-# macOS / Linux
-chmod +x install.sh && ./install.sh
+# 从本仓库安装（推荐）
+git clone https://github.com/SuLingGG/kixparadigm.git
+cd kixparadigm
+./install.sh
+
+# 或 npm 全局安装（postinstall 自动执行安装器）
+npm i -g .
 ```
 
-详见 [INSTALL.md](INSTALL.md)。装完 `/kixpower-new` 开始。
+安装器做五件事：
 
-## 这是什么：两层 + 插件地板
+1. 把 `dsh/preset`、`dsh/preset-classic` 镜像到 `$DSH_HOME/.agent-presets/`；
+2. 把 4 个角色子代理预设（`children/`）一并复制；
+3. 在 `$DSH_HOME/profiles/web/cordis.patch.yml` 写入受管 preset 声明块（幂等，`BEGIN/END` 标记内可重复更新）；
+4. 把 preset 正文物化到 `$DSH_HOME/profiles/web/kix-presets/`（真实目录，保证 `@deepseek-ai/*` 走宿主解析层）；
+5. 安装 vision-bridge，并给已安装 DSH 打 7 处兼容补丁（`scripts/patch-dsh-runtime.js`）。
 
-下表是范式能力面。**默认激励面注入压缩思考锚点 + 效用准则**；编曲说明书与 agents 模板在 `kixparadigm-classic`。技能货架两边都按需加载。
-
-| 层 | 组件 | 一句话 |
-|----|------|--------|
-| **认知层**（怎么思考） | 默认：压缩锚点+激励面；classic：全文 | 三通道交叉验证、阶段二相性、规则是负债、需求三检（不迎合用户）、写码前决策链 |
-| **执行层**（怎么执行） | kixpower（说明书随 classic；成员档两边可激活） | 编曲模型：主模型自由挑成员（dev/qa/reviewer）+ Sprint 流程、DAG 拓扑、4 层 loop、四条不变量地板 |
-| 机械门禁 | `kix-guards` · `kix-consistency` | commit 预算、feature branch、force push、危险 SQL、控制面保护（硬 deny 仅不可逆破坏）；preset 一致性写时拦截（防 zh/en 漂移） |
-| 交接纪律 | `kix-orchestration` · `kix-discipline` | subagent 交接证据链校验；spec 契约 gate + 验证 gate |
-| 聚焦 | `kix-focus` | 工具面 85→18 常驻裁剪 + 按需目录与代理执行——渐进披露的运行时形态 |
-| 浏览器 | `kix-browser`（默认激励面常驻；classic 未挂载） | 原生 `browser{action}` 17 动作（open/snapshot/click/type/press/select/hover/导航/等待/截图/上传/多标签/弹窗）——playwright-core 直驱、CDP attach 接管真实浏览器（登录态保留）、会话跨调用持久；替代 MCP 五跳链路。死亡条款：连续一个月真实会话 <2 次则回退按需 |
-| 成本路由 | `kix-cost` · `kix-route` | 子代理思考强度归一化；哨兵模型名 → 运行时可用路由 |
-| 补足 | `kix-commands` · `dsh-vision-bridge` · `kix-stalled` | `/kixpower-*` 原生命令；仅明确无视觉的主模型转描述，多模态模型原生收图；停滞 Sprint 检测（默认激励面已启用、candidate keep；classic yml 仍注释 = opt-in） |
-
-默认激励面提供压缩思考锚点 + 效用准则 + 按需技能 + probe/settle/experience。classic 另提供全文编曲说明书、agents 模板与 instructions。清单以各目录为准。各插件机制与版本演进见 [DSH-ADAPTATION.md](dsh/preset-classic/DSH-ADAPTATION.md) 与 [CHANGELOG.md](CHANGELOG.md)。
-
-## 仓库结构
-
-```
-kixparadigm/
-├── dsh/preset/        ← 默认激励面：persona/插件 + skills/agents 目录指针（安装时物化）；适配文档在 classic
-├── en/                ← 英文版（独立 npm 包 kixparadigm-en，与中文包同步发版）
-├── skills/ agents/ prompts/ memories/ instructions/   ← VS Code Copilot 分发版（7 技能子集）
-├── bin/ scripts/      ← CLI 与安装/验证/一致性守护脚本
-└── install.ps1 / install.sh / INSTALL.md / CHANGELOG.md
-```
-
-> **唯一事实源约定**：`dsh/preset/` 是事实源，`~/.dsh/.agent-presets/kixparadigm/` 只是安装副本（维护 = 改 preset 后跑 `scripts/sync-dsh-preset.ps1 -Force`）；DSH 0.2.0+ 还会从同一份源物化 `~/.dsh/profiles/kix-presets/<id>/`——0.2.0 的 preset 正文必须落在 profiles 树内的真实目录，否则宿主只为 profiles 树内的导入者装 `@deepseek-ai/*` 解析拦截层，正文会被静默禁用（见 [dsh/README-DSH.md](dsh/README-DSH.md)）。根目录 `skills/` 等是 Copilot 分发版，与 DSH 版刻意不同，不互相覆盖。
-
-## 开发与验证
+然后重启 DSH：
 
 ```bash
-npm test                                    # 一致性守护 + 全插件回归（计数由测试输出自报，不在本文档维护）
-node scripts/check-dsh-consistency.cjs      # persona 预算/分发镜像/双语一致性守护
-kixparadigm doctor                          # 安装状态自检
+dsh web
 ```
+
+在模式选择器里选 **kixparadigm**（或 classic），建会话。
+
+### 指定 DSH 运行时
+
+安装器会自动从 `which dsh`、`npm root -g`、`~/.local`、`/usr/local` 查找运行时。找不到时：
+
+```bash
+KIX_DSH_NODE_MODULES=/path/to/@deepseek-ai/dsh/node_modules ./install.sh
+```
+
+### 自检 / 卸载
+
+```bash
+node bin/kixparadigm.js doctor
+node bin/kixparadigm.js uninstall                # 移除 preset、声明、vision-bridge
+node bin/kixparadigm.js uninstall --revert-runtime  # 同时还原 DSH 运行时补丁
+```
+
+`uninstall` 只动 `$DSH_HOME` 与本安装器打过的补丁，不触碰其他 DSH 实例、端口、会话或 provider 配置。
+
+## 修复内容（0.2.2-rc.5）
+
+### 1. preset 装载机制：目录不再被读取
+
+0.2.x 的 `dsh-agent-preset-registry` **不扫描** `.agent-presets/`；preset 必须是 profile 里的
+`@deepseek-ai/dsh-agent-preset` 声明行，用 `cordis:include` 指回已复制的 preset 文件。
+
+- 修复：安装器写入受管 patch 块；`doctor` 校验。
+- 证据：`agentPresets/list` 从“只有 4 个内置模式”变为列出 6 个 kix 模式。
+
+### 2. `tool-presentation` 的 `both` 被移除
+
+0.2.2 只接受 `native` / `ptc`，且两者互斥。`both`（native + run_code 并存）是 0.2.0 的旧机制。
+
+- 修复：preset 显式挂 `@deepseek-ai/dsh-tool-executor-native`。
+- 后果：主会话不再有 `run_code`；机械批处理改为“脚本文件 + bash”或 `workflow`。persona 已同步改写，不再承诺 `run_code`。
+
+### 3. 子代理 `persona` / `toolFilter` 被移除
+
+0.2.2 的 `dsh-tool-subagent` 对这两个字段**加载即报错**，要求把角色组合放进独立的 Agent Preset，并用 `agentPreset` 选择。
+
+- 修复：新增 4 个角色子代理预设：`kix-lite`、`kix-reviewer`、`kix-qa`、`kix-dev`；
+  `subagent_lite/reviewer/qa/dev` 分别绑定；`persona`/`toolFilter` 从工具行和动态激活表删除。
+- 效果：lite 仍是 8 个工具 + 8K 帽；reviewer/qa/dev 恢复各自角色人格；generic/cross/thinker/vision 仍并入主 preset。
+
+### 4. 压缩 schema 删除了绝对上限字段
+
+0.2.2 的 `dsh-compaction-basic` 只支持比例 + headroom，无法表达“任意窗口都不超过 N token”的绝对上限。
+
+- 修复：`scripts/patch-dsh-runtime.js` 恢复 `maxThresholdTokens` / `maxRetainTokens` 两个字段并在解析 token 预算时取 min。
+- preset 配置：默认档 `T=min(512K, 0.8·W)`、`R=min(64K, 0.044·W)`；classic 档 `T=200K`。
+- 证据：`/compact` 返回 `Compacted 97 history items (~10649 tokens)`。
+
+### 5. `kix-route` 哨兵模型被适配器预检拒绝
+
+0.2.2 在子代理启动前调用 `llm.resolveCallConfig` 校验 `agentOptions.model`，`kix-route:cross/thinker/vision` 这类虚拟模型直接 `UNKNOWN_MODEL`。
+
+- 修复 A（运行时补丁）：预检遇到 `kix-route:` 前缀时跳过。
+- 修复 B（插件）：路由解析从被禁止的 `agent/request` 改写迁移到 `agent/created` + `agent.model.select()`，在 step 准备前写入真实路由。
+- 证据：`subagent_cross` 子代理实际使用 `deepseek-official/deepseek-flash`（与主模型 `opencode-go` 不同厂商）并返回 `CROSS-OK`。
+
+### 6. `agent/request` 不再允许改 reasoning effort
+
+0.2.2 对 effort 变化同样硬报错，而 `kix-cost` 的复杂度感知 effort 正是在该钩子注入。
+
+- 修复（运行时补丁）：移除该 effort 一致性 throw；provider/model 仍由 `agent/created` 保证一致。
+
+### 7. 消息来源 `kind: 'plugin'` 已不存在
+
+0.2.2 的 source 是 merge-extensible，每个生产者声明 `plugin:<name>`；旧的 catch-all `plugin` 不再合法。
+
+- 修复：所有 kix 插件的 notice 改为 `plugin:<name>`（`plugin:kix-guards` 等）。
+
+### 8. `tool-subagent-control/list-agents` 子路径被删除
+
+`list_agents` 现在由 `dsh-tool-subagent-control` 主入口默认注册。
+
+- 修复：删除 `tool-subagent-list-agents` 行；`list_agents` 仍可用。
+
+### 9. 工具配置字段变为必填
+
+0.2.2 的 `dsh-tool-fs-search` 要求 `sampleOverCapGlobResults`、`dsh-tool-todo` 要求 `allowParallelInProgress`，缺省即挂载失败。
+
+- 修复：主 preset 与子代理预设都显式写入。
+
+### 10. `{{cwd}}` 提示变量被移除
+
+0.2.2 只注册 `provider` / `model` 两个 prompt variable；persona 直接因 `UNKNOWN_PROMPT_VARIABLE` 失败。
+
+- 修复：persona 改为“Working directory: the workspace.”，cwd 由运行时上下文提供。
+
+### 11. 动态激活语义调整
+
+0.2.2 在工具执行中再次 `tools.execute` 同一批次会被拒绝（`Tool batch execution failed`）。
+
+- 修复：`kix_capability_call` 首次激活时返回“已激活，下一轮可直接调用”，不再同批执行；下一轮直呼成功。
+- `kix-focus` 的 `restrict` 先登记/失败回滚，避免 0.2.x `tools/change` 同步重入导致栈溢出。
+
+## 目录结构
+
+```
+dsh/
+├── preset/                 # 默认激励面（安装为 kixparadigm）
+│   ├── children/           # 4 个角色子代理 preset 组合
+│   ├── plugins/            # kix 机制插件 + 测试
+│   ├── prompts/ skills/ memories/ patches/
+│   └── agent.cordis.yml
+├── preset-classic/         # 经典全文（安装为 kixparadigm-classic）
+├── preset-null/            # 消融对照（不安装）
+└── vision-bridge/          # 无缝识图插件
+scripts/
+├── install-lib.js          # 安装器：preset + 声明块 + 链接 + 补丁
+├── patch-dsh-runtime.js    # 7 处 0.2.2 兼容补丁（幂等/可回滚）
+└── check-dsh-consistency.cjs
+```
+
+## 验证
+
+```bash
+npm test                 # 安装器 + 补丁 apply/revert + 一致性 + 全部插件单测
+```
+
+本仓库的 E2E 验证在**隔离环境**完成，未触碰现有 DSH：
+
+- 独立 `npm --prefix iso/dsh0225` 安装 `@deepseek-ai/dsh@0.2.2-rc.5`；
+- 独立 `DSH_HOME=iso/state0225`、端口 3098；
+- 另建 `iso/dsh0225-clean` 从**未打补丁**的官方包跑完整安装 → apply → 会话 → uninstall → revert；
+- 验证后 clean 运行时 `--check` 回到未打补丁状态，`$DSH_HOME` 无 kix/vision-bridge 残留。
+
+## 已知边界
+
+- **仅目标 0.2.2-rc.5**。0.2.0 的 compaction 已有绝对字段、`both` 仍存在，补丁锚点不匹配；安装器会明确报错而不是静默降级。
+- 运行时补丁写在 `node_modules`，**每次升级 DSH 后必须重跑** `node scripts/patch-dsh-runtime.js`（`doctor` 会提示）。
+- `kix-route` 的 provider 熔断 failover 依赖 `agent/request` 改写；0.2.2 禁止该改写，因此仅保留“首轮路由选择”，不再在同一 step 内换 provider。跨厂商首轮选择正常。
+- `kix_capability_call` 首次使用多一轮往返（激活 → 下一轮直呼）。
+- `run_code` 在 native 模式下不可用；需要 Code Mode 时请选 DSH 内置 `ptc` 模式。
 
 ## License
 
-[MIT](LICENSE) © 2026 kixparadigm contributors
+MIT，继承上游 `olicesx/kixparadigm`。

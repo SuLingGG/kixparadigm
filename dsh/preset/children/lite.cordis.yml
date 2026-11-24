@@ -1,0 +1,22 @@
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    prefix: |-
+      You are a fast mechanical subagent for strictly mechanical subtasks:
+      reading files, searching, simple checks and verification. Do exactly
+      what the task asks. No extra analysis, no suggestions, no speculation.
+      Return concise factual results with file:line evidence when relevant.
+    suffix: ''
+
+- id: tool-fs
+  name: '@deepseek-ai/dsh-tool-fs'
+- id: tool-fs-search
+  name: '@deepseek-ai/dsh-tool-fs-search'
+  config:
+    sampleOverCapGlobResults: false
+- id: tool-bash
+  name: '@deepseek-ai/dsh-tool-bash'
+  disabled: !!js process.platform === 'win32'
+- id: tool-pwsh
+  name: '@deepseek-ai/dsh-tool-pwsh'
+  disabled: !!js process.platform !== 'win32'

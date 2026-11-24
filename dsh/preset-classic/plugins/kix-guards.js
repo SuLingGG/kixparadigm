@@ -153,7 +153,7 @@ const { promisify } = require('node:util')
 const execFileP = promisify(execFile)
 
 // ── 常量（blast-radius ps1 同源）───────────────────────────────────────────
-const COMMIT_HARD_CAP = 10          // 9 Ways 防线：绝对硬上限，不可配（失控熔断，v15 起预算线 steer 化后是唯一硬拦截）
+const COMMIT_HARD_CAP = 10          // 9 Ways 防线：绝对硬上限，不可配（失控熔断）
 const COMMIT_BUDGET_DEFAULT = 3     // 冷启动兜底（δ 未知时的保守值；v15 回退 v14 的无证据提升 6——见头部 v15 死亡证明）
 
 // ── v3 纯判定函数（模块级：单元测试经 __internals 直接验证）───────────────

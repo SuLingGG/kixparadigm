@@ -7,10 +7,8 @@
 #     （2026-08-17 起：主模型自由挑成员+流程，四条不变量地板见 persona）。
 #   - 机制细节层（插件 plugins/）——常驻：guards/cost/route/focus/browser/
 #     probe/settle/mem（EXP1–EXP3 实验血统转正，见 memories/incentive-lessons.md
-#     出生证明）；默认关闭（渐进面）：budget（行仅 classic 档启用；L3
-#     verify-subsidy 与 effect 回调修复 2026-10-02 起四副本字节同步——审计
-#     收口：原两簇分叉系修复未移植的漂移非有意变体，已并簇见
-#     consistency-lib PLUGIN_IDENTITY_GROUPS）；2026-08-20 用户全开裁决：discipline/orchestration/consistency/commands/
+#     出生证明）；默认关闭（渐进面，classic 全开）：budget（L3 补贴驻 classic；
+#     2026-08-20 用户全开裁决：discipline/orchestration/consistency/commands/
 #     signal/stalled 全部恢复启用——插件层关闭无对照证据，缩减只属于常驻层）。
 #   - 方法论记忆（memories/）——incentive-lessons（实验锚定）、orchestration-lessons
 #     （编排纪律）、verification-lessons（验证纪律：配置轴盲区/跨边界数字权威/判别器/
@@ -36,18 +34,14 @@
 
 # ── identity ────────────────────────────────────────────────────────────────
 
-# 【墓志 2026-09 瘦身】旧常驻认知层已由下行 persona-incentive 激励面取代；保留
-# 全文作回滚资产与 classic 对照，无实证摩擦不再注入，可随 classic 档退役一并删。
-# `{{model}}`/`{{cwd}}` 从 agent 自己的路由与工作区解析。
-# （text/prefix 双键同锚约定：text 键供 consistency-lib extractPersona 预算提取
-# （正则锚定 `text: &锚 |-`），运行时注入走 prefix 同锚内容——单份文本双消费者，
-# 非死键；两行 persona 同此约定。）
+# kixparadigm 常驻认知层（每次会话生效）。`{{model}}` 从 agent 自己的
+# 路由与工作区解析。
 - id: persona
   name: '@deepseek-ai/dsh-persona'
   disabled: true
   config:
     text: &kix_persona |-
-      You are a coding agent powered by the {{model}} model, running on the DeepSeek Harness. Your working directory is {{cwd}}.
+      You are a coding agent powered by the {{model}} model, running on the DeepSeek Harness. Working directory: the workspace.
 
       You run on kixParadigm — AI 自编排最小范式。核心信念：模型推理是主力，工具只补已知盲点；限制越少越好；范式是工具不是目标。机制细节由插件强制或按需加载，常驻层只放思考锚点。
 
@@ -114,7 +108,7 @@
       - 工具面见宿主工具列表；按需档位经 kix_capability_call 首用自动激活；workflow 取消 disabled 需重启。
       - 子代理编排面（v5.12）：depth-1 子代理只可经 kix_capability_call 派 subagent_lite 做机械取证；in-process maxDepth=2，静态/动态 toolFilter 与 guard 共同拒绝 depth≥2、regular/cross/goal/workflow。
       - Sandbox 升级参数：首次调用省略 sandbox_permissions 与 justification；仅真实 sandbox denial 后才对原调用单次成对重试；approval disabled 时永不设置。
-      - 原生优先：机械多步/并发/跨工具变换用 run_code；单步、可回放验证、审批动作直呼 native；复杂编排 workflow；长目标 goal；先规划 plan mode；长任务 run_in_background+job_output；deny 立即中止。
+      - 工具选择：单步、可回放验证、审批动作直呼 native；机械多步/并发/跨工具变换写脚本文件后用 shell，或交 workflow；复杂编排 workflow；长目标 goal；先规划 plan mode；长任务 run_in_background+job_output；deny 立即中止。DSH 0.2.2 的 native 与 PTC 执行器互斥，本模式选 native（无 run_code）。
 
       ## 资源
       memories/*.md（编排实证教训 ①-⑬+候选在 memories/orchestration-lessons.md，编曲/分派/审计类决策时先查；机制事实/会话考古在 memories/dsh-capability-map.md；通用方法论在 memories/ai-agent-practices.md）。
@@ -123,7 +117,7 @@
   name: '@deepseek-ai/dsh-persona'
   config:
     text: &kix_persona_incentive |-
-      You are a coding agent powered by the {{model}} model, running on the DeepSeek Harness. Your working directory is {{cwd}}.
+      You are a coding agent powered by the {{model}} model, running on the DeepSeek Harness. Working directory: the workspace.
 
       You run on kixParadigm — AI 自编排最小范式。核心信念：模型推理是主力，工具只补已知盲点；限制越少越好；范式是工具不是目标。机制细节由插件强制或按需加载，常驻层放思考锚点与选择压，不放仪式。
 
@@ -152,7 +146,7 @@
       - 盲抽样校准：对自判低风险并跳过独立观察的直做任务保留低频 fresh 抽样；有效反例触发重估风险分类，零 finding 仅弱证据、不自动降强度，finding 数量不计价。
       - 卡住时 skill（how-to）与 experience（危机教训）；编曲/分派/审计先查 orchestration-lessons，交付前验证存疑先查 verification-lessons。
       - 分派先判依赖与肥瘦：子任务独立且够肥（数十秒级）→合并一条消息并行分派；独立而微小→直派串行——扇出固定开销须被摊薄，E2E 实证小任务并行更慢更贵；顺序依赖→一次派发背走整链、链内自带 PASS 门，禁拆碎片并行再由主线程对账。
-      - 执行载体先于拆步：按整段机械工作比较净收益，不得拆步后逐项默认 native。多结果裁剪/聚合、肥/未知中间值隔离、共享状态/控制流或跨工具变换→run_code，只返回决策所需结果；机械取数/计算的临时 JS/TS→run_code，不套 bash node -e/heredoc，bash 仅跑已有项目脚本或整段一个结果已可决策的操作。语义判断、原始证据、编辑、审批、外部副作用及逐步验证→native；复杂阶段→workflow。不设配额。
+      - 执行载体先于拆步：按整段机械工作比较净收益，不得拆步后逐项默认 native。多结果裁剪/聚合、肥/未知中间值隔离、共享状态/控制流或跨工具变换→写成脚本文件并用 bash（或交 workflow），只返回决策所需结果；语义判断、原始证据、编辑、审批、外部副作用及逐步验证→native；复杂阶段→workflow。不设配额。
     prefix: *kix_persona_incentive
 - id: agent-instructions
   name: '@deepseek-ai/dsh-agent-instructions'
@@ -292,18 +286,14 @@
       name: '@deepseek-ai/dsh-compaction-basic'
       config:
         # 甜点策略：阈值 = 上限 × 每模型溢出安全，保留预算同样封顶
-        #     T = min(maxThresholdTokens 200K, 0.8 × W)
+        #     T = min(maxThresholdTokens 512K, 0.8 × W)
         #     R = min(maxRetainTokens   64K, 0.044 × W)
         # 64K–4M 任何窗口自动落到甜点，新模型/新厂商零配置适配，故 modelPolicies 为空。
         #
         # 依赖 kix-compaction-cap-patch.mjs 给引擎加的两个绝对字段；未打补丁的进程会
         # 因未知配置键中止挂载。dsh-web.service 的 drop-in kix-cap-patch.conf 在每次
-        # 启动时自愈补丁（防 dsh 升级覆盖 node_modules）。落地/回滚文档在
-        # kix-bundle 源仓 docs/kix-context-management.md、脚本在源仓
-        # scripts/context-budget/（源仓相对路径，preset 部署面不随附）；部署面
-        # 真实承载：/root/kix-context-budget/kix-compaction-cap-patch.mjs +
-        # /etc/systemd/system/dsh-web.service.d/kix-cap-patch.conf（2026-10-02
-        # 审计收口：原两相对路径在部署树不存在，改为双上下文显式指向）。
+        # 启动时自愈补丁（防 dsh 升级覆盖 node_modules）。落地/回滚流程见
+        # docs/kix-context-management.md，脚本在 scripts/context-budget/。
         #
         # 血统：默认 0.8 在 1M = 800K 阈值，kixpower 整改会话爬到 466K 从未触发，上下文
         # O(N²) 累积烧掉 100.8M 重读 token；v5.9 全局降到 0.45 并对两个 1M 模型钉 0.18。
@@ -313,10 +303,17 @@
         # / glm-5.3 在 20K–400K 全对，未测到拐点；同负载 27 请求下 200K 上限 = 2.63M/2.80M
         # 累计 prompt、256K = 3.57M、400K = 4.68M，三者召回与压缩保真全 PASS → 取三条独立
         # 约束（成本随上限单调 / 可压带 R ≤ 0.4(T−F)，F≈23K / 有效利用 ~20%）的交点 200K。
+        #
+        # 2026-11-20 用户上调 200K → 512K：200K 触发太频繁（实测单会话 5 次压缩，峰值仅
+        # 213K）。1M 路由仍在压力预算内：1M − 预留补全 256K − headroom 64K = 678K，512K 留
+        # 166K 余量；opencode-go 路由（maxTokens 384K）预算 550K，512K 合法但只剩 38K 余量。
+        # R 不变 = 32,735 → 压缩后只留约 33K 逐字尾部，单次压缩要一次摘要约 479K 历史
+        # （更慢更贵、压缩点更稀）；>400K 的能力未标定（2026-09-12 标定只到 400K）。
         thresholdRatio: 0.8
-        maxThresholdTokens: 200000
+        maxThresholdTokens: 512000
         retainRatio: 0.044
         maxRetainTokens: 64000
+        headroomTokens: 65536
         modelPolicies: []
 
     - id: command-compact
@@ -362,15 +359,11 @@
     - id: tool-subagent-control
       name: '@deepseek-ai/dsh-tool-subagent-control'
 
-    - id: tool-subagent-list-agents
-      name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
-
     - id: tool-subagent
       name: '@deepseek-ai/dsh-tool-subagent'
       config:
         provider: spawn
         toolName: subagent
-        backgroundMode: continuable
         maxDepth: 2
         # ── 原生模型选型（2026-09-10）──────────────────────────────────────
         # 融合而非并列：通用档改用 DSH 原生能力——本行每次调用可显式给
@@ -385,7 +378,6 @@
         # 生效前提（两处都在）：host 挂 @deepseek-ai/dsh-tool-subagent/
         # model-selection-settings；settings.yaml 的 subagent-model-selection
         # .enabled=true 且 allowedModels 非空（空白名单会在挂载时 throw）。
-        modelSelectionSettings: true
         # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
         # bash/read/grep/glob；exit_plan_mode/ask_user_question/
         # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
@@ -403,8 +395,6 @@
         # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
         # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
         # 不该有的编排面，不是能力。
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
         agentOptions:
           # v5.8 预算帽：完成侧（思考+回答）兜底上限，防失控（s1 budget forcing）
           maxTokens: 65536
@@ -438,17 +428,10 @@
       name: '@deepseek-ai/dsh-tool-subagent'
       disabled: true
       config:
+        agentPreset: kix-lite
         provider: spawn
         toolName: subagent_lite
-        backgroundMode: continuable
         maxDepth: 2
-        persona: |-
-          You are a fast mechanical subagent for strictly mechanical subtasks:
-          reading files, searching, simple checks and verification. Do exactly
-          what the task asks. No extra analysis, no suggestions, no speculation.
-          Return concise factual results with file:line evidence when relevant.
-        toolFilter:
-          allow: [ read, grep, glob, !!js "process.platform === 'win32' ? 'pwsh' : 'bash'" ]
         agentOptions:
           # 不钉 provider/model：子代理默认继承父代理路由（spawn provider 的
           # 继承语义，见 dsh-subagent-spawn-in-process README「inherits the
@@ -473,12 +456,24 @@
       config:
         provider: spawn
         toolName: subagent_thinker
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           model: kix-route:thinker
           maxTokens: 131072
@@ -501,12 +496,24 @@
       config:
         provider: spawn
         toolName: subagent_cross
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           model: kix-route:cross
           maxTokens: 65536
@@ -527,12 +534,24 @@
       config:
         provider: spawn
         toolName: subagent_vision
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           model: kix-route:vision
           # 视觉模型普遍 4K 输出帽（settings zai-vision maxTokens 4096）；
@@ -546,12 +565,24 @@
       config:
         provider: fork
         toolName: subagent_fork
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           # v5.8 预算帽：继承会话上下文的子代理同样兜底
           maxTokens: 65536
@@ -561,52 +592,32 @@
     # 按需加载）：只读 + 反方辩护三层（2026-08-17 三问显式分层）+ 结构化
     # rebuttal 输出。「结论发布前」的对抗性检查通道（对照：kix-guards 管操作
     # 前、kix-discipline 管编辑前）。现为常驻高频观察成员；重大审查可按不同
-    # lens 并发多个 reviewer 实例。契约判据（2026-10-02 审计收口，源自
-    # verification-lessons ⑮「改权威文件≠改生效副本」三连踩）：本行 persona 即
-    # 生效契约唯一事实源——DSH 运行时只注入本快照；agents/kixpower-reviewer.
-    # agent.md（经 ../preset-classic/agents 指针）为 Copilot 时代参考档，
-    # kixpower 手工流程引用，冲突以本行为准。三层对抗义务源自 prompts/
-    # kixpower-review.prompt.md §反方辩护测试 v5.4；配置轴七轴清单单源在
-    # memories/verification-lessons.md，快照为其注入载体。
+    # lens 并发多个 reviewer 实例。核心语义来自 agents/kixpower-reviewer.agent.md
+    #（保持单一权威，此处为 DSH 可注入的精简 persona 快照）。
     - id: tool-subagent-reviewer
       name: '@deepseek-ai/dsh-tool-subagent'
       config:
+        agentPreset: kix-reviewer
         provider: spawn
         toolName: subagent_reviewer
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
-        persona: |-
-          You are kixpower-reviewer: an independent read-only adversarial reviewer.
-          Hard constraints:
-          - The bound artifact is read-only: never edit it, change its Git state,
-            commit, push, or publish. Temporary reproducers outside artifact_root are allowed.
-          - You may recursively dispatch narrow read-only evidence probes when a concrete
-            information gap warrants it; propagate review_stage/review_policy/artifact_root
-            so the whole observation tree shares one frozen revision.
-          - Technical claims require evidence (file:line or official docs);
-            unknown contracts return `unknown` — never escalate severity on assumption.
-          - Configuration-axis duty: evidence holds only under the configuration
-            that produced it. Diff the production defaults against the fixture
-            config axis by axis (MTU / stack & implementation choice / toggles /
-            timeouts / buffers / route modes / dependency versions); any
-            difference no case covers is a blind spot — return it as disputed
-            evidence, never wave it through because tests are green and other
-            lenses already reviewed.
-          Adversarial duty in three layers (devil's advocate; run all three
-          before any claim is accepted):
-          - L1 rebuttal rehearsal: what is the author's most likely technical
-            rebuttal — intentional behavior or an explicit opt-in?
-          - L2 depth probe: what is the DEEPEST property you verified — did you
-            read the callee implementation, or stop at the surface call chain?
-          - L3 language-model stress: for suggestions, do they hold under the
-            target language's dispatch/type/concurrency model?
-          Return structured output: for each claim, mechanism/contract/impact
-          status (confirmed|disputed|unknown) with evidence, plus a `rebuttal`
-          field with the author's most likely counterargument.
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           maxTokens: 65536
 
@@ -622,81 +633,61 @@
     #     是 Copilot 时代残留，不建行不蒸馏）；
     #   - dev 三人合一档：Nova/Sage/Milo 的内部切换本就发生在同一 agent
     #     body（「根据任务类型在三个角色间切换」），一行 persona 蒸馏契约即可。
-    # 契约判据同 reviewer 先例（2026-10-02 收口）：本行 persona 即生效契约唯一
-    # 事实源；agents/kixpower-{qa,dev}.agent.md 为参考档，冲突以本行为准；
-    # 组合留痕走 kix_discipline_spec 的 mode 字段（成员组合
+    # 契约快照与 agents/kixpower-{qa,dev}.agent.md 保持单一权威关系（同
+    # reviewer 先例）；组合留痕走 kix_discipline_spec 的 mode 字段（成员组合
     # + 一句理由）；四条不变量地板见 persona「编曲模型」节。dev/qa/reviewer
     # 常驻；职责命中优先专用成员，低频 lite/thinker/vision/fork 仍按需激活。
     - id: tool-subagent-qa
       name: '@deepseek-ai/dsh-tool-subagent'
       config:
+        agentPreset: kix-qa
         provider: spawn
         toolName: subagent_qa
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
-        persona: |-
-          You are kixpower-qa (Ivy): acceptance testing, bug filing, and QA
-          signoff — never business source code.
-          Hard constraints:
-          - Edit only tests and QA docs (*_test.*, *.test.*, *.spec.*,
-            *.stories.*, e2e/**, tests/**, cypress/**, docs/qa/*); bugs go to
-            issues with repro steps, Dev fixes them — you re-test and close.
-          - Deterministic-first: machine-verifiable gates (test/lint/typecheck/
-            format) before any judgment call; never re-run with an LLM what a
-            deterministic gate already covers.
-          - Evidence gate: bug claims resting on external semantics (library/
-            platform behavior) need evidence first (official docs / source
-            file:line); unverified → "needs confirmation" — never inflate
-            severity on assumption.
-          - Signoff is evidence-bound: PASS/CONDITIONAL/FAIL only from executed
-            gates + playthrough; incomplete evidence → no PASS; touching any
-            test/fixture after verification → REVERIFY_REQUIRED, never a
-            direct PASS; CONDITIONAL only means CI-pending.
-          - Config-parity gate: green holds only under the fixture config.
-            Diff the production defaults against the fixture axis by axis
-            (MTU / stack & implementation choice / toggles / timeouts /
-            buffers / route modes / dependency versions); an undeclared or
-            uncovered difference →
-            CONDITIONAL, never PASS. A change with no configuration surface
-            needs one sentence, no more.
-          Report with tables: gate results / verdict / issue list.
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           maxTokens: 65536
 
     - id: tool-subagent-dev
       name: '@deepseek-ai/dsh-tool-subagent'
       config:
+        agentPreset: kix-dev
         provider: spawn
         toolName: subagent_dev
-        backgroundMode: continuable
         maxDepth: 2
-        #（v5.10 toolFilter 裁剪理由、deny 名单语义与 run_code/subagent 特例：
-        #  见本文件 tool-subagent 行同名注释块——单一权威，各行不再复制。2026-10-02 收敛）
-        toolFilter:
-          deny: [ exit_plan_mode, subagent_cross, interrupt_agent, send_message, list_agents, ask_user_question, kix_tool_activate, kix_tool_deactivate ]
-        persona: |-
-          You are kixpower-dev (Nova frontend / Sage backend / Milo design —
-          one contract, three hats): the coding member on the CEO team.
-          Hard constraints:
-          - Code only what the dispatch brief / sprint plan scopes (YAGNI):
-            write inside target_rules, no scope creep, no files outside the
-            agreed range.
-          - Before new code in a module, read representative existing files
-            there and match their style (naming, error handling, tests,
-            module layout) — adjacent code over training-data defaults.
-          - After each task run the local deterministic gates yourself (fmt/
-            lint/typecheck/unit tests) and fix failures immediately — never
-            push them to QA; LLM-as-judge never substitutes a deterministic
-            check.
-          - Never sign QA verdicts or write signoff artifacts; never author
-            plan/PROJECT_BRIEF planning content — execution status only.
-          - Blocked → report the blocker with facts (failure mode + root
-            cause); do not improvise around it.
-          Report: what changed / gate results / known issues, tables over prose.
+        # v5.10（2026-08-17 子代理账本实测：107 子代理 2,432 次调用，82% 是
+        # bash/read/grep/glob；exit_plan_mode/ask_user_question/
+        # kix_tool_activate/kix_capability_call 全部 0 使用）——子代理编排面
+        # 裁剪。deny 名单只含 8 个恒注册编排名（restrict 对未注册名抛错）；
+        # subagent 移出名单：dsh-subagent 用 composeFrom(childCtx, parent.ctx)
+        # 把 preset 挂进**子代理自己的 layer**，own-layer 名不在
+        # restrictableNames 内，留在名单里 = 每次派发 throw
+        # （tools.restrict() names unknown global tool "subagent"）。
+        # 嵌套派发改由 plugins/kix-cost.js 的 tools.guard + harness maxDepth
+        # 拒绝。条件挂载名由 plugins/kix-cost.js 分层：仅 depth-1 subagent_lite
+        # 机械取证放行，其余 tier/goal/workflow 拒绝。deny 名同时从 tools 与 TypeScript
+        # 工具镜像消失。run_code 不在名单：它是 Code Mode 保留传输名，
+        # restrict 不能命名（WSL2 实弹实锤），作为正当执行通道留在子代理
+        # 可见面，其工具镜像一并保留。subagent×2/agent 控制是「编排
+        # 留主线程」（kix 地板②）的主线程职责。文件/执行/检索/jobs/
+        # skill/report/MCP（capability_call）全保留——裁的是子代理定义上
+        # 不该有的编排面，不是能力。
         agentOptions:
           maxTokens: 65536
 
@@ -732,9 +723,7 @@
     # 会话 4 次 workflow spawn）；EXP3 ⑦ 常驻工具无仪式性滥用，闲置成本
     # ≈1 条 schema；启停摩擦不对称（关闭后需重启宿主才能再启用）。死亡
     # 条款：连续一个月真实会话零使用 → 恢复 disabled（随下次发版重启
-    # 落地）。复核触发（2026-10-02 收口）：每次发版（CHANGELOG 落版）时按
-    # kix-task-log 口径审计当月真实会话使用计数后兑现或续期本条款。
-    # ralph 已移除（极低频 + 可替代，
+    # 落地）。ralph 已移除（极低频 + 可替代，
     # 负债判定）。workflow-ptc 行必须留在本 realm 内——worker-thread 时代移出
     # 导致重启后 UI 损坏（commands/list 空 + 设置 Failed to fetch + 轮询风暴），
     # 已回退（2026-08-16）。0.1.7 起包名是 dsh-workflow-ptc；ptcRuntime 与
@@ -904,18 +893,13 @@
     thinkerProviderHint: [ deepseek-official ]
 
 # ── presentation（PTC/Code Mode 融入）───────────────────────────────────────
-# `both` = native 工具 schema 与 Code Mode SDK（run_code + tools.* 绑定）并存，
-# 不声明 code-only 规则 → native 直呼照常可执行，模型自主选择形态：
-#   - 单步/验证/观察动作 → native 直呼（证据可回放、门禁逐条可见）
-#   - 机械多步序列/批处理/并发探测 → run_code 程序（一次往返，Promise.all 并发，
-#     try/catch 容错；SDK 子分派走完整 pre-execute→guards→execute→post-execute 管线，
-#     门禁依然拦截；仅 print/return 回流，中间值不可重建）
-# 行等待宿主 `codeRuntime`（web-app bundle 已组装 dsh-code-runtime-worker-thread）；
-# 未组装运行时的部署会在挂载时指名此 id 拒绝。
-- id: tool-presentation
-  name: '@deepseek-ai/dsh-agent-tool-presentation'
-  config:
-    mode: both
+# DSH 0.2.2 removed the `both` presentation: native and PTC are mutually
+# exclusive executors. kix chooses native so every gate, approval and tool schema
+# stays directly callable; mechanical batches go through script files + shell or
+# workflow. Mounting the executor explicitly keeps the choice independent of the
+# deployment default.
+- id: tool-executor
+  name: '@deepseek-ai/dsh-tool-executor-native'
 
 # ── kix 流程命令（P1-8：DSH 原生命令平面，2026-08 落地）────────────────
 # 注册 /kixpower-new /kixpower-import /kixpower-continue /kixpower-review
@@ -1000,8 +984,6 @@
 # cordis 语义回归单测）——该证明已失效，本裁决取而代之。
 # **死亡条款（显式）**：连续一个月真实会话中 browser 使用 <2 次 → 注释
 # 本行回退 v1.2.23 渐进披露（ACTIVATABLE_TOOLS.browser 为唯一路径）。
-# 复核触发（2026-10-02 收口）：每次发版（CHANGELOG 落版）时按 kix-task-log
-# 口径审计当月使用计数后兑现或续期——判据量自此有明确复核时点。
 # 双路径关系（有意）：本行=默认常驻；用户注释本行禁用后，kix-focus 的
 # ACTIVATABLE_TOOLS.browser 仍是回退激活路径（修复后字节的激活路径 live
 # E2E 待该场景首次出现时补验——现仅有单测级回归）。
