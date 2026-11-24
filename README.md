@@ -48,6 +48,10 @@ dsh web
 
 在模式选择器里选 **kixparadigm**（或 classic），建会话。
 
+> 选择器里还会看到 `kix-lite` / `kix-reviewer` / `kix-qa` / `kix-dev`：它们是子代理内部
+> 预设（描述以“内部子代理模式”开头），由 `subagent_lite/reviewer/qa/dev` 自动选用，
+> 不需要手动选择。
+
 ### 指定 DSH 运行时
 
 安装器会自动从 `which dsh`、`npm root -g`、`~/.local`、`/usr/local` 查找运行时。找不到时：
