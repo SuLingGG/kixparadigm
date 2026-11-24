@@ -297,7 +297,10 @@ function mergeVisionBridgePatch(text) {
     '      name: dsh-vision-bridge',
   ].join(newline)
   if (new RegExp(`^\\s*- id:\\s*${BRIDGE_NAME}\\s*$`, 'm').test(text)) return { text, changed: false }
-  if (isEmptyRoot(text)) return { text: `${text.replace(/\s+$/, '')}${newline}${newline}${block}${newline}`, changed: true }
+  if (isEmptyRoot(text)) {
+    const prefix = text.replace(/^\s*\[\]\s*$/m, '').replace(/\s+$/, '')
+    return { text: `${prefix}${newline}${newline}${block}${newline}`, changed: true }
+  }
   return { text: `${text.replace(/\s+$/, '')}${newline}${newline}${block}${newline}`, changed: true }
 }
 

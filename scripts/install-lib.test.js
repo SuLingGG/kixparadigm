@@ -24,9 +24,10 @@ test('managed block removal restores an empty patch root', () => {
 })
 
 test('vision-bridge merge is valid and idempotent', () => {
-  const first = lib.mergeVisionBridgePatch('[]\n')
+  const first = lib.mergeVisionBridgePatch('# comment\n[]\n')
   assert.equal(first.changed, true)
   assert.ok(first.text.includes('- id: dsh-vision-bridge'))
+  assert.ok(!/^\[\]$/m.test(first.text), 'empty root must be removed')
   const second = lib.mergeVisionBridgePatch(first.text)
   assert.equal(second.changed, false)
   assert.equal(second.text, first.text)
