@@ -1,52 +1,5 @@
-# 依赖与构建产物
 node_modules/
 *.tgz
-npm-debug.log*
-
-# 个人工作区（不入库）
-.zcode/
-
-# 本地会话测量产物（含个人路径/会话 ID/prompt 预览，仅本地生成，勿入库）
-tools/log-audit/*.json
-
-# 环境变量与密钥（不入库；.env.example 例外，可作模板提交）
-.env
-.env.*
-!.env.example
-
-# npm 认证（token 只留在用户级 ~/.npmrc，绝不入库）
-.npmrc
-
-# 系统杂项
+*.kix-backup
+.kix-paradigm-runtime-patch.json
 .DS_Store
-Thumbs.db
-
-# 本地 Node 运行时 tarball（WSL 自举用，31MB 二进制，不入库）
-node-v*.tar.xz
-node-v*.tar.gz
-
-# 本地分析/报告工作区（含会话数据与个人路径，仅本地，勿入库）
-tmp-analyze/
-
-# 本地 E2E/探针脚本工作区（含机器绝对路径，仅本地，勿入库）
-.kix-tmp/
-
-# 本地需求三检契约状态（插件运行时本地产物）
-kix-discipline/
-
-# Playwright MCP 本地痕迹
-.playwright-mcp/
-
-colony-before.png
-docs/session-*.md
-
-# 会话临时产物与编辑备份（不入库、不进 npm 包；v1.3.1 自检 F3）
-*.backup
-placeholder.txt
-temp_zstd.txt
-test_fix.txt
-tmp_test_temp.txt
-tmp_*.txt
-# Python 字节码（脚本无第三方依赖，缓存不入库）
-__pycache__/
-*.pyc

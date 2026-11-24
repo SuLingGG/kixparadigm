@@ -1,9 +1,9 @@
 {
   "name": "kixparadigm",
-  "version": "1.3.23",
-  "description": "kixparadigm — AI 自编排最小范式（认知层常驻）+ kixpower 多智能体编排 + DSH 一键导入（preset + vision-bridge + 门禁插件）",
+  "version": "1.4.0",
+  "description": "kixparadigm DSH-only distribution: kix presets, child-role presets, and the 0.2.2-rc.5 compatibility patch for DeepSeek Harness",
   "license": "MIT",
-  "author": "kix (olicesx)",
+  "author": "kix (olicesx), DSH-only fork by SuLingGG",
   "keywords": [
     "kixparadigm",
     "kixpower",
@@ -12,58 +12,54 @@
     "ai-agent",
     "deepseek-harness",
     "dsh",
-    "agent-preset",
-    "multi-agent",
-    "coding-agent"
+    "agent-preset"
   ],
   "bin": {
     "kixparadigm": "bin/kixparadigm.js"
   },
   "files": [
-    "kix-vscode-mechanism-audit.md",
     "bin/",
     "scripts/",
     "dsh/",
-    "skills/",
-    "agents/",
-    "instructions/",
-    "prompts/",
-    "memories/",
-    "INSTALL.md",
-    "install.ps1",
-    "install.sh",
+    "docs/",
     "README.md",
-    "README.en.md",
+    "INSTALL.md",
     "LICENSE"
   ],
   "scripts": {
     "postinstall": "node scripts/install-lib.js --quiet",
-    "test:installer": "node --test scripts/dsh-runtime-resolve.test.js scripts/install-lib.test.js scripts/sync-dsh-preset.test.js",
+    "install": "node bin/kixparadigm.js install",
+    "doctor": "node bin/kixparadigm.js doctor",
+    "uninstall": "node bin/kixparadigm.js uninstall",
+    "runtime-patch": "node scripts/patch-dsh-runtime.js",
+    "test:installer": "node --test scripts/install-lib.test.js",
     "test:runtime-patch": "node --test scripts/patch-dsh-runtime.test.js",
-    "test:consistency": "node scripts/check-dsh-consistency.cjs",
-    "test:vision": "node --test dsh/vision-bridge/test.js",
-    "test:pressures": "node scripts/audit-selection-pressure-history.cjs --check && node --test scripts/audit-selection-pressure-history.test.js scripts/audit-delegation-history.test.js",
-    "test": "npm run test:installer && npm run test:runtime-patch && node scripts/check-dsh-consistency.cjs && npm run test:pressures && node --test dsh/vision-bridge/test.js && cd dsh/preset/plugins && node --test",
-    "audit:pressures": "node scripts/audit-selection-pressure-history.cjs",
-    "verify:vision": "node scripts/verify-vision-bridge-resolution.cjs",
-    "verify:guards": "node scripts/verify-guards.js"
+    "test:plugins": "cd dsh/preset/plugins && node --test",
+    "test": "npm run test:installer && npm run test:runtime-patch && npm run test:consistency && npm run test:plugins",
+    "test:consistency": "node scripts/check-dsh-consistency.cjs"
   },
   "engines": {
     "node": ">=20.16.0"
   },
   "kixparadigm": {
     "variants": [
-      { "id": "kixparadigm", "dir": "dsh/preset" },
-      { "id": "kixparadigm-classic", "dir": "dsh/preset-classic" }
-    ]
+      {
+        "id": "kixparadigm",
+        "dir": "dsh/preset"
+      },
+      {
+        "id": "kixparadigm-classic",
+        "dir": "dsh/preset-classic"
+      }
+    ],
+    "bridgeDir": "dsh/vision-bridge"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/olicesx/kixparadigm.git"
+    "url": "https://github.com/SuLingGG/kixparadigm.git"
   },
   "bugs": {
-    "url": "https://github.com/olicesx/kixparadigm/issues"
+    "url": "https://github.com/SuLingGG/kixparadigm/issues"
   },
-  "homepage": "https://github.com/olicesx/kixparadigm#readme"
+  "homepage": "https://github.com/SuLingGG/kixparadigm#readme"
 }
-

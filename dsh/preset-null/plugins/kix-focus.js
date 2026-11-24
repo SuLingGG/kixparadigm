@@ -100,12 +100,6 @@ const RESIDENT_TOOLS = new Set([
   'subagent', 'subagent_cross',
   // workflow 已挂载（2026-08-16 临时启用,自发使用测试中）
   'workflow',
-  // dsh-mcp-resources 三工具：DSH 0.2.0-rc.2 起 base 层随已配置 MCP 默认挂载
-  // （dsh-base cordis.patch.yml mcp-resources 行），全局注册、restrict 不裁
-  // （deny 只打 mcp__* 前缀与 web_search）。2026-10-02 审计收口：加入常驻
-  // 语义集，菜单不再把它们误归「other 按需」组——常驻工具由其 schema 自
-  // 描述（本会话工具面可见），不经 capability_call。
-  'list_mcp_resources', 'list_mcp_resource_templates', 'read_mcp_resource',
   'kix_capability_search', 'kix_capability_call',
   ...SCOPE_RESIDENT,
 ])
@@ -167,7 +161,7 @@ const CAPABILITY_GROUPS = [
   {
     id: 'jobs',
     title: '后台任务（job_output/job_list/job_kill）',
-    hint: '常驻、可直接调用：长任务用 ' + (process.platform === 'win32' ? 'pwsh' : 'bash') + ' run_in_background: true 启动；job_list 确认任务存在 → job_output 读结果 → job_kill 停止（2026-10-02 收口：shell 名按平台取，原硬编码 pwsh 在 Linux 串味）',
+    hint: '常驻、可直接调用：长任务用 pwsh run_in_background: true 启动；job_list 确认任务存在 → job_output 读结果 → job_kill 停止',
     tools: ['job_output', 'job_list', 'job_kill'],
   },
   {
@@ -360,11 +354,7 @@ const ACTIVATABLE_TOOLS = {
   // 2026-08-20 三分法回滚：web_search 曾加入此处（渐进披露），评估否决——
   // 低频 + 断 KV 缓存成本远超省下的常驻税，恢复 cordis tool-web 常驻。
   // 见 dsh/preset/agent.cordis.yml tool-web 行注释（回滚理由完整记录）。
-  // 2026-10-02 审计收口：workflow 移出本表（死激活路径）——它依赖 isolate
-  // realm 内的 workflowEngine，realm 外动态挂载解析不到 → 激活必诚实报错
-  // （2026-08-16 实测，agent.cordis.yml tool-workflow 行注释在档）；行内已
-  // 常驻时本表条目不可达，行被 disabled 时唯一启用路径 = 取消行 disabled
-  // 重启。保留只会误导「存在激活捷径」。
+  workflow: { package: '@deepseek-ai/dsh-tool-workflow', config: {} },
   goal: { package: '@deepseek-ai/dsh-tool-goal', config: {} },
   // 2026-08-18 渐进披露扩容：kix-browser（本地插件，17 action 浏览器自动化）
   // 默认不装载（不占常驻 schema）；pkgPath 相对本插件目录解析（同 preset
@@ -376,17 +366,12 @@ const ACTIVATABLE_TOOLS = {
   subagent_lite: {
     package: '@deepseek-ai/dsh-tool-subagent',
     config: {
-      provider: 'spawn', toolName: 'subagent_lite', backgroundMode: 'continuable', maxDepth: CHILD_MAX_DEPTH,
-      persona: `You are a fast mechanical subagent for strictly mechanical subtasks:
-reading files, searching, simple checks and verification. Do exactly
-what the task asks. No extra analysis, no suggestions, no speculation.
-Return concise factual results with file:line evidence when relevant.`,
+      provider: 'spawn', toolName: 'subagent_lite', agentPreset: 'kix-lite', maxDepth: CHILD_MAX_DEPTH,
       // 2026-08-17（v1.2.13，部署 E2E 复验实锤）：与 agent.cordis.yml 的
       // tool-subagent-lite 行同源——原硬编码 pwsh 只在 preset 行修了平台条件化，
       // 本 ACTIVATABLE_TOOLS 快照漏改 → capability_call 首次使用自动激活路径
       // 仍 tools.restrict() 报 unknown global tool "pwsh"（Linux 部署）。
       // 与 preset 行保持一致：win32 用 pwsh，其余平台用 bash。
-      toolFilter: { allow: ['read', 'grep', 'glob', process.platform === 'win32' ? 'pwsh' : 'bash'] },
       // 不钉 provider/model：父代理路由继承（见 agent.cordis.yml tool-subagent-lite
       // 行注释）。8K 帽才是本档判据（kix-cost isLiteTier = maxTokens<=8192）。
       agentOptions: { maxTokens: 8192 },
@@ -395,24 +380,21 @@ Return concise factual results with file:line evidence when relevant.`,
   subagent_thinker: {
     package: '@deepseek-ai/dsh-tool-subagent',
     config: {
-      provider: 'spawn', toolName: 'subagent_thinker', backgroundMode: 'continuable', maxDepth: CHILD_MAX_DEPTH,
-      toolFilter: { deny: [...CHILD_TOOL_DENY] },
+      provider: 'spawn', toolName: 'subagent_thinker', maxDepth: CHILD_MAX_DEPTH,
       agentOptions: { model: 'kix-route:thinker', maxTokens: 131072 },
     },
   },
   subagent_vision: {
     package: '@deepseek-ai/dsh-tool-subagent',
     config: {
-      provider: 'spawn', toolName: 'subagent_vision', backgroundMode: 'continuable', maxDepth: CHILD_MAX_DEPTH,
-      toolFilter: { deny: [...CHILD_TOOL_DENY] },
+      provider: 'spawn', toolName: 'subagent_vision', maxDepth: CHILD_MAX_DEPTH,
       agentOptions: { model: 'kix-route:vision', maxTokens: 4096 },
     },
   },
   subagent_fork: {
     package: '@deepseek-ai/dsh-tool-subagent',
     config: {
-      provider: 'fork', toolName: 'subagent_fork', backgroundMode: 'continuable', maxDepth: CHILD_MAX_DEPTH,
-      toolFilter: { deny: [...CHILD_TOOL_DENY] },
+      provider: 'fork', toolName: 'subagent_fork', maxDepth: CHILD_MAX_DEPTH,
       agentOptions: { maxTokens: 65536 },
     },
   },
@@ -834,6 +816,17 @@ module.exports = {
           defAgent = agentScope ? tools.get(toolName, agentScope) : null
           defGlobal = tools.get(toolName, undefined)
           def = defAgent || defGlobal
+        }
+        // DSH 0.2.2：在工具执行中再次 tools.execute 同一批次会被拒绝
+        // （"Tool batch execution failed"）。首次激活已成功时直接返回，
+        // 下一轮由模型直呼——多一轮往返，换来确定成功。
+        if (autoActivated) {
+          return {
+            ok: true,
+            tool: toolName,
+            autoActivated: true,
+            note: `kix-focus: ${toolName} 首次使用已自动激活，下一轮起可直接调用（kix_tool_deactivate 卸载）。`,
+          }
         }
         // 档位守卫：subagent_lite 仅在 maxTokens > 8192 时可用（避免 lite 档反锁）。
         if (toolName === 'subagent_lite' && exec.agent && exec.agent.options && exec.agent.options.maxTokens <= 8192) {

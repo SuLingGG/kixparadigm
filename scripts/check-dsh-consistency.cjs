@@ -1,29 +1,33 @@
 #!/usr/bin/env node
 'use strict'
-// kixparadigm DSH 一致性守护（v1.2.11；2026-08-17 拆核重构）——防「规则是负债」类漂移：
-//   - persona 常驻预算（字符数 + 近似 token 估算）
-//   - README 可观察计数与 preset 实际文件一致
-//   - zh/en 插件字节一致（语言中立复制约定）
-//   - DSH/en preset 本地 Markdown 链接可达
-//   - 全部 JS/CJS/MJS 语法可解析
-//   - package 版本与 engines 声明一致
-// 检查逻辑已提取到 dsh/preset/plugins/consistency-lib.cjs（与 kix-consistency 插件
-// 共用单一事实源，防「CI 一套、运行时一套」双源漂移）；本文件只做 CLI 组装。
-// 不依赖第三方包；npm test 会运行。
-
+// DSH-only consistency gate: syntax, persona budget, shelf pointers, and the
+// byte-identity groups that the runtime plugins rely on.
+const fs = require('node:fs')
 const path = require('node:path')
-const lib = require('../dsh/preset/plugins/consistency-lib.cjs')
+const lib = require(path.join(__dirname, '..', 'dsh', 'preset', 'plugins', 'consistency-lib.cjs'))
 
-const ROOT = path.join(__dirname, '..')
+const root = path.resolve(__dirname, '..')
+const failures = []
+const notes = []
+const add = (r) => { failures.push(...(r.failures || [])); notes.push(...(r.notes || [])) }
 
-console.log('== kixparadigm DSH consistency check ==')
-
-const { failures, notes } = lib.runAllZh(ROOT)
-for (const n of notes) console.log('  ✔ ' + n)
-
-if (failures.length) {
-  console.error(`\nCONSISTENCY FAIL (${failures.length})`)
-  for (const f of failures) console.error('  ✖ ' + f)
-  process.exit(1)
+for (const rel of ['dsh/preset', 'dsh/preset-classic', 'dsh/preset-null']) {
+  add(lib.checkSyntax({ root, rel: `${rel}/plugins`, label: `${rel}/plugins` }))
 }
-console.log('\nCONSISTENCY OK')
+for (const [rel, maxChars] of [['dsh/preset/agent.cordis.yml', 4500], ['dsh/preset-classic/agent.cordis.yml', 4500]]) {
+  add(lib.checkPersonaBudget({ root, rel, maxChars, maxEstTokens: 2600 }))
+}
+add(lib.checkDefaultShelfPointers({ root }))
+for (const f of fs.readdirSync(path.join(root, 'dsh/preset/plugins'))) {
+  if (!/^kix-.*\.js$/.test(f) || /\.test\.js$/.test(f)) continue
+  add(lib.checkPluginPair({ root, name: f }))
+}
+
+for (const n of notes) console.log(`  · ${n}`)
+if (failures.length) {
+  console.log(`\nCONSISTENCY FAIL (${failures.length})`)
+  for (const f of failures) console.log(`  ✖ ${f}`)
+  process.exitCode = 1
+} else {
+  console.log('\nCONSISTENCY PASS')
+}
