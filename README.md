@@ -29,8 +29,9 @@ git clone https://github.com/SuLingGG/kixparadigm.git
 cd kixparadigm
 ./install.sh
 
-# 或 npm 全局安装（postinstall 自动执行安装器）
+# 或 npm 全局安装；npm 12+ 可能拦截 postinstall，安装后手动跑一次 kixparadigm install
 npm i -g .
+kixparadigm install
 ```
 
 安装器做五件事：
